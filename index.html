@@ -1,0 +1,687 @@
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlexGameStore - Tu Tienda de Juegos Online</title>
+    <link rel="icon" href="https://imgfz.com/i/69TjdM0.png" type="image/x-icon">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #6200EA;
+            --secondary-color: #B388FF;
+            --background-color: #F3E5F5;
+            --text-color: #37474F;
+            --card-background: rgba(255, 255, 255, 0.9);
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        .search-bar {
+            flex-grow: 1;
+            margin: 0 20px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .search-bar input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .icons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .icon {
+            cursor: pointer;
+            font-size: 24px;
+            color: white;
+            transition: color 0.3s ease;
+        }
+
+        .icon:hover {
+            color: var(--secondary-color);
+        }
+
+        .carousel {
+            margin: 40px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .carousel-container {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .carousel-item {
+            flex: 0 0 33.33%;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+
+        .carousel-item img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .carousel-item .game-title {
+            font-weight: bold;
+            font-size: 1em;
+            margin-top: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .carousel-controls {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .carousel-control {
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .game-card {
+            background: var(--card-background);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .game-card img {
+            width: 100%;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .game-title {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .game-price {
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        .original-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 0.9em;
+            margin-right: 5px;
+        }
+
+        .discount {
+            background-color: #E91E63;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-weight: bold;
+            flex: 1;
+            margin: 0 5px;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background: var(--card-background);
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 350px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+        }
+
+        footer {
+            background: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 50px;
+        }
+
+        #supportIcon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #25D366;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        #supportIcon:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <h1>AlexGameStore</h1>
+            <div class="search-bar">
+                <input type="text" id="search" placeholder="Buscar juegos...">
+            </div>
+            <div class="icons">
+                <span class="icon" id="cartIcon"><i class="fas fa-shopping-cart"></i></span>
+                <span id="cartTotal">$0.00</span>
+                <span class="icon" id="userIcon"><i class="fas fa-user"></i></span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <section class="carousel" id="recommendedSection">
+            <h2>Juegos Recomendados</h2>
+            <div class="carousel-container" id="recommendedGames">
+                <!-- Carousel items will be added here dynamically -->
+            </div>
+            <div class="carousel-controls">
+                <button class="carousel-control" id="prevBtn">&lt;</button>
+                <button class="carousel-control" id="nextBtn">&gt;</button>
+            </div>
+        </section>
+
+        <div class="game-grid" id="gameGrid"></div>
+    </div>
+
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Iniciar sesión / Registrarse</h2>
+            <form id="authForm">
+                <input type="email" id="email" placeholder="Correo electrónico" required><br><br>
+                <input type="password" id="password" placeholder="Contraseña" required><br><br>
+                <button type="submit" id="loginBtn" class="btn">Iniciar sesión</button>
+                <button type="button" id="registerBtn" class="btn">Registrarse</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="cartModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Carrito de compras</h2>
+            <div id="cartItems"></div>
+            <div id="cartTotal"></div>
+            <button id="payBtn" class="btn">Pagar</button>
+        </div>
+    </div>
+
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Perfil de usuario</h2>
+            <div id="userInfo"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 AlexGameStore. Todos los derechos reservados.</p>
+    </footer>
+
+    <div id="supportIcon">
+        <i class="fab fa-whatsapp"></i>
+    </div>
+
+    <script>
+        // Configuración de Firebase (reemplaza con tus propias credenciales)
+        const firebaseConfig = {
+   apiKey: "AIzaSyBqZA3HxgwR9PQFe9jO0MH8PzpDgzQ8DZg",
+  authDomain: "alexgamestore-226b7.firebaseapp.com",
+  projectId: "alexgamestore-226b7",
+  storageBucket: "alexgamestore-226b7.appspot.com",
+  messagingSenderId: "703880448623",
+  appId: "1:703880448623:web:2ec71054dc8848a4469b9a"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Variables globales
+        let currentUser = null;
+        let cart = [];
+
+        // Elementos del DOM
+        const gameGrid = document.getElementById('gameGrid');
+        const searchInput = document.getElementById('search');
+        const authModal = document.getElementById('authModal');
+        const cartModal = document.getElementById('cartModal');
+        const userModal = document.getElementById('userModal');
+        const authForm = document.getElementById('authForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const cartIcon = document.getElementById('cartIcon');
+        const userIcon = document.getElementById('userIcon');
+        const cartItems = document.getElementById('cartItems');
+        const cartTotal = document.getElementById('cartTotal');
+        const payBtn = document.getElementById('payBtn');
+        const userInfo = document.getElementById('userInfo');
+        const recommendedGames = document.getElementById('recommendedGames');
+        const recommendedSection = document.getElementById('recommendedSection');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const supportIcon = document.getElementById('supportIcon');
+
+        // Datos de juegos (en una situación real, estos vendrían de una base de datos)
+        const games = [
+            { id: 1, title: "Left 4 Dead 2 - Steam", price: 7.00, discountedPrice: 3.00, image: "https://static.wikia.nocookie.net/left4dead/images/8/86/Left_4_Dead_2.jpg/revision/latest?cb=20110417031837&path-prefix=es" },
+            { id: 2, title: "Discord Nitro 3 Meses", price: 20, discountedPrice: 3.47, image: "https://cdn1.epicgames.com/salesEvent/salesEvent/EGS_Discord_Nitro_Mobile_1200x1600_1200x1600-98bc3f097023a53fca0c6a6c6781c9f5" },
+            { id: 3, title: "Counter Strike 1.6 - Steam", price: 7.00, discountedPrice: 3.00, image: "https://images.g2a.com/300x400/1x1x1/counter-strike-16-steam-key-global-i10000043576002/590dfe5f5bafe36b3378d122" },
+            { id: 4, title: "Grand Theft Auto V - Rockstar", price: 27.19, discountedPrice: 13.50, image: "https://a.allegroimg.com/s512/11453a/9161ee7b4ef6be372696ef2a5644/Grand-Theft-Auto-V-GTA-5-Edycja-Premium-Polska-Wersja-PC-KLUCZ" },
+            { id: 5, title: "The Forest - Steam", price: 9.87, discountedPrice: 2.00, image: "https://howlongtobeat.com/games/TheForest.jpg" },
+            { id: 6, title: "Phasmophobia - Steam", price: 8.00, discountedPrice: 5.00, image: "https://cdn.hobbyconsolas.com/sites/navi.axelspringer.es/public/media/image/2020/10/phasmophobia-cartel-2108489.jpg?tf=1200x" },
+            { id: 7, title: "Knights of Honor II: Sovereign - Steam", price: 24.00, discountedPrice: 6.20, image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvUmegB2QytbiWF2JyZ0dXA_QPbXonHA9Bhw&s" },
+            { id: 8, title: "Stray Gods", price: 17.00, discountedPrice: 4.00, image: "https://upload.wikimedia.org/wikipedia/en/f/f6/Stray_Gods_The_Roleplaying_Musical_cover.jpg" },
+            { id: 9, title: "Supermarket Simulator - Steam", price: 8.00, discountedPrice: 4.00, image: "https://styles.redditmedia.com/t5_avds4h/styles/communityIcon_qtg15qt7eipc1.jpg?format=pjpg&s=edb808d13c95c08951322333c9c5e34f0e7c8eb2" },
+        ];
+
+        // Funciones
+        function displayGames(gamesToShow = games) {
+            gameGrid.innerHTML = '';
+            gamesToShow.forEach(game => {
+                const gameCard = document.createElement('div');
+                gameCard.className = 'game-card';
+                gameCard.innerHTML = `
+                    <img src="${game.image}" alt="${game.title}" width="200" height="200">
+                    <div class="game-title">${game.title}</div>
+                    <div class="game-price">
+                        ${game.price !== game.discountedPrice ? `<span class="original-price">$${game.price.toFixed(2)}</span>` : ''}
+                        $${game.discountedPrice.toFixed(2)}
+                        ${game.price !== game.discountedPrice ? `<span class="discount">${Math.round((1 - game.discountedPrice / game.price) * 100)}% OFF</span>` : ''}
+                    </div>
+                    <div class="btn-container">
+                        <button class="btn add-to-cart" data-id="${game.id}">Añadir al carrito</button>
+                        <button class="btn buy-now" data-id="${game.id}">Comprar</button>
+                    </div>
+                `;
+                gameGrid.appendChild(gameCard);
+            });
+
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', addToCart);
+            });
+
+            document.querySelectorAll('.buy-now').forEach(button => {
+                button.addEventListener('click', buyNow);
+            });
+        }
+
+        function displayRecommendedGames() {
+            recommendedGames.innerHTML = '';
+            const recommendedIds = [1, 2, 4, 6, 7, 9]; // IDs de juegos recomendados
+            recommendedIds.forEach(id => {
+                const game = games.find(g => g.id === id);
+                const carouselItem = document.createElement('div');
+                carouselItem.className = 'carousel-item';
+                carouselItem.innerHTML = `
+                    <img src="${game.image}" alt="${game.title}" width="200" height="200">
+                    <div class="game-title">${game.title}</div>
+                    <div class="game-price">$${game.discountedPrice.toFixed(2)}</div>
+                `;
+                recommendedGames.appendChild(carouselItem);
+            });
+        }
+
+        function addToCart(event) {
+            if (!currentUser) {
+                alert('Por favor, inicia sesión para añadir juegos al carrito.');
+                showAuthModal();
+                return;
+            }
+
+            const gameId = parseInt(event.target.getAttribute('data-id'));
+            const game = games.find(g => g.id === gameId);
+            
+            const existingItem = cart.find(item => item.id === gameId);
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                cart.push({ ...game, quantity: 1 });
+            }
+
+            updateCartTotal();
+        }
+
+        function buyNow(event) {
+            const gameId = parseInt(event.target.getAttribute('data-id'));
+            const game = games.find(g => g.id === gameId);
+            
+            let message = `Hola, me gustaría comprar el siguiente juego:\n\n`;
+            message += `${game.title} - $${game.discountedPrice.toFixed(2)}\n`;
+            message += `\nTotal: $${game.discountedPrice.toFixed(2)}`;
+
+            // Copiar al portapapeles
+            navigator.clipboard.writeText(message).then(() => {
+                alert('Los detalles del pedido se han copiado al portapapeles.');
+            });
+
+            // Abrir WhatsApp
+            const whatsappNumber = '1234567890'; // Reemplaza con el número real
+            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        function updateCartTotal() {
+            const total = cart.reduce((sum, item) => sum + item.discountedPrice * item.quantity, 0);
+            document.getElementById('cartTotal').textContent = `$${total.toFixed(2)}`;
+        }
+
+        function showAuthModal() {
+            authModal.style.display = 'block';
+        }
+
+        function showCartModal() {
+            cartModal.style.display = 'block';
+            updateCartDisplay();
+        }
+
+        function showUserModal() {
+            if (!currentUser) {
+                alert('Por favor, inicia sesión para ver tu perfil.');
+                showAuthModal();
+                return;
+            }
+            userModal.style.display = 'block';
+            updateUserInfo();
+        }
+
+        function updateCartDisplay() {
+            cartItems.innerHTML = '';
+            cart.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.innerHTML = `
+                    ${item.title} - $${item.discountedPrice.toFixed(2)} x ${item.quantity}
+                    <button class="btn remove-from-cart" data-id="${item.id}">Eliminar</button>
+                `;
+                cartItems.appendChild(itemElement);
+            });
+
+            const total = cart.reduce((sum, item) => sum + item.discountedPrice * item.quantity, 0);
+            cartTotal.textContent = `Total: $${total.toFixed(2)}`;
+
+            document.querySelectorAll('.remove-from-cart').forEach(button => {
+                button.addEventListener('click', removeFromCart);
+            });
+        }
+
+        function removeFromCart(event) {
+            const gameId = parseInt(event.target.getAttribute('data-id'));
+            cart = cart.filter(item => item.id !== gameId);
+            updateCartDisplay();
+            updateCartTotal();
+        }
+
+        function updateUserInfo() {
+            if (currentUser) {
+                db.collection('users').doc(currentUser.uid).get().then(doc => {
+                    if (doc.exists) {
+                        const userData = doc.data();
+                        userInfo.innerHTML = `
+                            <p>Email: ${currentUser.email}</p>
+                            <p>Saldo: $${userData.balance.toFixed(2)}</p>
+                            <p>Total gastado: $${userData.totalSpent.toFixed(2)}</p>
+                            <h3>Historial de compras:</h3>
+                            <ul>
+                                ${userData.purchaseHistory.map(purchase => `
+                                    <li>${purchase.title} - $${purchase.price.toFixed(2)}</li>
+                                `).join('')}
+                            </ul>
+                        `;
+                    }
+                });
+            }
+        }
+
+        // Event Listeners
+        authForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    authModal.style.display = 'none';
+                })
+                .catch(error => alert(error.message));
+        });
+
+        registerBtn.addEventListener('click', () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            auth.createUserWithEmailAndPassword(email, password)
+                .then(() => {
+                    authModal.style.display = 'none';
+                    db.collection('users').doc(auth.currentUser.uid).set({
+                        balance: 0,
+                        totalSpent: 0,
+                        purchaseHistory: []
+                    });
+                })
+                .catch(error => alert(error.message));
+        });
+
+        cartIcon.addEventListener('click', showCartModal);
+        userIcon.addEventListener('click', showUserModal);
+
+        payBtn.addEventListener('click', () => {
+            if (cart.length === 0) {
+                alert('Tu carrito está vacío.');
+                return;
+            }
+
+            let message = 'Artículos en el carrito:\n\n';
+            cart.forEach(item => {
+                message += `${item.title} - $${item.discountedPrice.toFixed(2)} x ${item.quantity}\n`;
+            });
+
+            const total = cart.reduce((sum, item) => sum + item.discountedPrice * item.quantity, 0);
+            message += `\nTotal: $${total.toFixed(2)}`;
+
+            // Copiar al portapapeles
+            navigator.clipboard.writeText(message).then(() => {
+                alert('Los detalles del pedido se han copiado al portapapeles.');
+            });
+
+            // Abrir WhatsApp
+            const whatsappNumber = '1234567890'; // Reemplaza con el número real
+            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        });
+
+        searchInput.addEventListener('input', () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filteredGames = games.filter(game => 
+                game.title.toLowerCase().includes(searchTerm)
+            );
+            displayGames(filteredGames);
+
+            // Mostrar u ocultar la sección de juegos recomendados
+            if (searchTerm.length > 0) {
+                recommendedSection.style.display = 'none';
+            } else {
+                recommendedSection.style.display = 'block';
+            }
+        });
+
+        // Cerrar modales
+        document.querySelectorAll('.close').forEach(closeBtn => {
+            closeBtn.addEventListener('click', () => {
+                closeBtn.closest('.modal').style.display = 'none';
+            });
+        });
+
+        // Carrusel de juegos recomendados
+        let currentSlide = 0;
+        const slidesPerView = 3;
+
+        prevBtn.addEventListener('click', () => {
+            currentSlide = Math.max(currentSlide - 1, 0);
+            updateCarousel();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentSlide = Math.min(currentSlide + 1, Math.ceil(recommendedGames.children.length / slidesPerView) - 1);
+            updateCarousel();
+        });
+
+        function updateCarousel() {
+            const slideWidth = recommendedGames.clientWidth / slidesPerView;
+            recommendedGames.style.transform = `translateX(-${currentSlide * slideWidth}px)`;
+        }
+
+        // Soporte por WhatsApp
+        supportIcon.addEventListener('click', () => {
+            const whatsappNumber = '1234567890'; // Reemplaza con el número real
+            const message = 'Hola, necesito ayuda con mi compra en GameStore.';
+            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        });
+
+        // Observador de autenticación
+        auth.onAuthStateChanged(user => {
+            currentUser = user;
+            if (user) {
+                console.log('Usuario conectado:', user.email);
+            } else {
+                console.log('Usuario desconectado');
+                cart = [];
+                updateCartTotal();
+            }
+        });
+
+        // Inicialización
+        displayGames();
+        displayRecommendedGames();
+    </script>
+</body>
+</html>
